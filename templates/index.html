@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IPL Match Predictor</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  </head>
+  <body>
+    <h1>IPL Match Predictor</h1>
+    <form id="predictionForm">
+      <label for="team1">Team 1:</label>
+      <select id="team1" name="team1">
+        <!-- Populate team options dynamically -->
+        {% for team in teams %}
+        <option value="{{ team }}">{{ team }}</option>
+        {% endfor %}
+      </select>
+      <br />
+      <label for="team2">Team 2:</label>
+      <select id="team2" name="team2">
+        <!-- Populate team options dynamically -->
+        {% for team in teams %}
+        <option value="{{ team }}">{{ team }}</option>
+        {% endfor %}
+      </select>
+      <br />
+      <label for="venue">Venue:</label>
+      <input type="text" id="venue" name="venue" />
+      <br />
+      <button type="submit">Predict Winner</button>
+    </form>
+    <p id="result"></p>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+  </body>
+</html>
