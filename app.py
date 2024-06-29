@@ -84,61 +84,47 @@ venue_name_mapping = {
     'Bharat Ratna Shri Atal Bihari Vajpayee Ekana Cricket Stadium, Lucknow': 'Bharat Ratna Shri Atal Bihari Vajpayee Ekana Cricket Stadium'
 }
 
-
 @app.route('/')
 def index():
     return render_template('index.html')
 
-@app.route('/home')
-def home():
-    return render_template('home.html', teams=teams, venues=venues)
-
-@app.route('/predict', methods=['POST'])
-def predict():
-    try:
-        data = request.form.to_dict()
-        print("Received form data:", data)  # Debug statement to print received form data
+@app.route('/champions', methods=['GET', 'POST'])
+def champions():
+    if request.method == 'POST':
+        try:
+            # Initialize counters for each team
+            team_wins = {team: 0 for team in teams}
+            
+            # Loop through all combinations of teams and venues
+            for team1, team2 in combinations(teams, 2):
+                for venue in venues:
+                    input_data = {col: 0 for col in model_columns}
+                    input_data[f'team1_{team1}'] = 1
+                    input_data[f'team2_{team2}'] = 1
+                    input_data[f'venue_{venue}'] = 1
+                    
+                    input_df = pd.DataFrame([input_data])
+                    prediction = model.predict(input_df)
+                    
+                    if prediction[0] == team1:
+                        team_wins[team1] += 1
+                    else:
+                        team_wins[team2] += 1
+            
+            # Determine the team with the maximum wins
+            winner = max(team_wins, key=team_wins.get)
+            
+            # Print the winner to the console for debugging
+            print(f'Debug: The predicted winner is {winner}')
+            
+            # Return JSON response with winner
+            return jsonify({'winner': winner})
         
-        if not data or not all(key in data for key in ['team1', 'team2', 'venue']):
-            missing_keys = [key for key in ['team1', 'team2', 'venue'] if key not in data]
-            return jsonify({'error': f'Missing or invalid data fields: {", ".join(missing_keys)}'}), 400
-        
-        # Validate team1, team2, and venue
-        if data['team1'] not in teams:
-            return jsonify({'error': f'Invalid team1: {data["team1"]}. Expected one of: {", ".join(teams)}'}), 400
-        
-        if data['team2'] not in teams:
-            return jsonify({'error': f'Invalid team2: {data["team2"]}. Expected one of: {", ".join(teams)}'}), 400
-        
-        # Standardize venue name
-        standardized_venue = venue_name_mapping.get(data['venue'], data['venue'])
-        if standardized_venue not in venues:
-            return jsonify({'error': f'Invalid venue: {standardized_venue}. Expected one of: {", ".join(venues)}'}), 400
-        
-        print("Standardized venue:", standardized_venue)  # Debug statement to print standardized venue
-        
-        # Prepare input data
-        input_data = {col: 0 for col in model_columns}  # Initialize all columns to 0
-        input_data[f'team1_{data["team1"]}'] = 1
-        input_data[f'team2_{data["team2"]}'] = 1
-        input_data[f'venue_{standardized_venue}'] = 1
-        print("Prepared input data:", input_data)  # Debug statement to print prepared input data
-        
-        # Convert to DataFrame
-        input_df = pd.DataFrame([input_data])
-        print("Input DataFrame:", input_df)  # Debug statement to print DataFrame
-        
-        # Make prediction
-        prediction = model.predict(input_df)
-        print("Prediction:", prediction[0])  # Debug statement to print prediction
-        
-        return jsonify({'prediction': prediction[0]})
+        except Exception as e:
+            return jsonify({'error': f'Server error: {str(e)}'}), 500
     
-    except KeyError as e:
-        return jsonify({'error': f'Missing key in data: {str(e)}'}), 400
-    
-    except Exception as e:
-        return jsonify({'error': f'Server error: {str(e)}'}), 500
+    # GET request to render the form or initial page
+    return render_template('champions.html')
 
 @app.route('/predict-ipl-2025', methods=['GET'])
 def predict_ipl_2025_winner():
@@ -166,6 +152,44 @@ def predict_ipl_2025_winner():
         winner = max(team_wins, key=team_wins.get)
         
         return jsonify({'seriesWinner': winner, 'wins': team_wins[winner]})
+    
+    except Exception as e:
+        return jsonify({'error': f'Server error: {str(e)}'}), 500
+
+
+@app.route('/home')
+def home():
+    return render_template('home.html', teams=teams, venues=venues)
+
+@app.route('/predict', methods=['POST'])
+def predict():
+    try:
+        data = request.form.to_dict()
+        print("Received form data:", data)  # Debug statement to print received form data
+        
+        if not data or not all(key in data for key in ['team1', 'team2', 'venue']):
+            missing_keys = [key for key in ['team1', 'team2', 'venue'] if key not in data]
+            return jsonify({'error': f'Missing or invalid data fields: {", ".join(missing_keys)}'}), 400
+        
+        # Validate team1, team2, and venue
+        if data['team1'] not in teams:
+            return jsonify({'error': f'Invalid team1: {data["team1"]}. Expected one of: {", ".join(teams)}'}), 400
+        
+        if data['team2'] not in teams:
+            return jsonify({'error': f'Invalid team2: {data["team2"]}. Expected one of: {", ".join(teams)}'}), 400
+        
+        if data['venue'] not in venues:
+            return jsonify({'error': f'Invalid venue: {data["venue"]}. Expected one of: {", ".join(venues)}'}), 400
+        
+        input_data = {col: 0 for col in model_columns}
+        input_data[f'team1_{data["team1"]}'] = 1
+        input_data[f'team2_{data["team2"]}'] = 1
+        input_data[f'venue_{data["venue"]}'] = 1
+        
+        input_df = pd.DataFrame([input_data])
+        prediction = model.predict(input_df)
+        
+        return jsonify({'winner': prediction[0]})
     
     except Exception as e:
         return jsonify({'error': f'Server error: {str(e)}'}), 500

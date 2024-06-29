@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Team and Venue Selection</title>
+    <style>
+      html,
+      body {
+        font-family: Arial, sans-serif;
+        height: 100%;
+        margin: 0;
+      }
+
+      body {
+        background-image: url("background.png");
+        background-color: #f0f0f0;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .container {
+        max-width: 800px;
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-gap: 20px;
+        padding: 20px;
+        box-sizing: border-box;
+      }
+
+      .selection-section {
+        text-align: center;
+      }
+
+      .section-title {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: white;
+      }
+
+      .item-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 0%;
+      }
+
+      .arrow {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        border-radius: 5px;
+      }
+
+      .arrow:hover {
+        background-color: #19388a;
+      }
+
+      .arrow.up-arrow {
+        transform: rotate(90deg);
+      }
+
+      .arrow.down-arrow {
+        transform: rotate(90deg);
+      }
+
+      .content img {
+        max-width: 100%;
+        max-height: 300px;
+        margin-top: 20px;
+        box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+        opacity: 0;
+        transform: translateY(50px);
+        transition: opacity 1s, transform 1s;
+      }
+
+      .item-name {
+        margin-top: 10px;
+        font-size: 16px;
+        color: white;
+        font-weight: bold;
+        background-color: rgba(0, 0, 0, 0.6);
+        padding: 5px 10px;
+        border-radius: 5px;
+      }
+
+      .predict-button {
+        grid-column: span 3;
+        background-color: #19388a;
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        cursor: pointer;
+        font-size: 18px;
+        font-weight: bold;
+        text-align: center;
+        transition: background-color 0.3s;
+        border-radius: 5px;
+        margin-top: 20px;
+      }
+
+      .predict-button:hover {
+        background-color: #13224a;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Team 1 Selection Section -->
+      <div class="selection-section">
+        <div class="section-title">TEAM 1</div>
+        <div class="item-container">
+          <button
+            class="arrow up-arrow"
+            onclick="changeTeam('team1', -1)"
+            style="margin-bottom: 10px"
+          >
+            &lt;
+          </button>
+          <img
+            id="team1-logo"
+            src="{{ url_for('static', filename='images/Royal Challengers Bengaluru.jpg') }}"
+            alt="Royal Challengers Bengaluru"
+            class="item-image"
+          />
+          <div id="team1-name" class="item-name">
+            Royal Challengers Bengaluru
+          </div>
+          <button
+            class="arrow down-arrow"
+            onclick="changeTeam('team1', 1)"
+            style="margin-top: 10px"
+          >
+            &gt;
+          </button>
+        </div>
+      </div>
+
+      <!-- Team 2 Selection Section -->
+      <div class="selection-section">
+        <div class="section-title">TEAM 2</div>
+        <div class="item-container">
+          <button
+            class="arrow up-arrow"
+            onclick="changeTeam('team2', -1)"
+            style="margin-bottom: 10px"
+          >
+            &lt;
+          </button>
+          <img
+            id="team2-logo"
+            src="{{ url_for('static', filename='images/Punjab Kings.jpg') }}"
+            alt="Punjab Kings"
+            class="item-image"
+          />
+          <div id="team2-name" class="item-name">Punjab Kings</div>
+          <button
+            class="arrow down-arrow"
+            onclick="changeTeam('team2', 1)"
+            style="margin-top: 10px"
+          >
+            &gt;
+          </button>
+        </div>
+      </div>
+
+      <!-- Venue Selection Section -->
+      <div class="selection-section">
+        <div class="section-title">VENUES</div>
+        <div class="item-container">
+          <button
+            class="arrow up-arrow"
+            onclick="changeVenue(-1)"
+            style="margin-bottom: 10px"
+          >
+            &lt;
+          </button>
+          <img
+            id="venue-image"
+            src="{{ url_for('static', filename='images/Arun Jaitley Stadium.jpeg') }}"
+            alt="Arun Jaitley Stadium"
+            class="item-image"
+          />
+          <div id="venue-name" class="item-name">Arun Jaitley Stadium</div>
+          <button
+            class="arrow down-arrow"
+            onclick="changeVenue(1)"
+            style="margin-top: 10px"
+          >
+            &gt;
+          </button>
+        </div>
+      </div>
+
+      <!-- Predict Winner Button -->
+      <button class="predict-button">PREDICT WINNER</button>
+    </div>
+
+    <script>
+      // Team and venue data
+      const teams = [
+        "Royal Challengers Bengaluru",
+        "Punjab Kings",
+        "Delhi Capitals",
+        "Mumbai Indians",
+        "Kolkata Knight Riders",
+        "Rajasthan Royals",
+        "Sunrisers Hyderabad",
+        "Chennai Super Kings",
+        "Gujarat Titans",
+        "Lucknow Super Giants",
+      ];
+
+      const venues = [
+        "Arun Jaitley Stadium",
+        "Eden Gardens",
+        "Sawai Mansingh Stadium",
+        "MA Chidambaram Stadium",
+        "M Chinnaswamy Stadium",
+        "Narendra Modi Stadium",
+        "Punjab Cricket Association Stadium",
+        "Wankhede Stadium",
+        "Rajiv Gandhi International Stadium",
+      ];
+
+      let currentVenueIndex = 0;
+
+      // Function to change team logo
+      function changeTeam(teamId, direction) {
+        const teamIndex = teams.indexOf(
+          document.getElementById(teamId + "-logo").alt
+        );
+        let newIndex = (teamIndex + direction + teams.length) % teams.length;
+        document.getElementById(teamId + "-logo").src =
+          "{{ url_for('static', filename='images/') }}" +
+          teams[newIndex] +
+          ".jpg";
+        document.getElementById(teamId + "-logo").alt = teams[newIndex];
+        document.getElementById(teamId + "-name").innerText = teams[newIndex];
+      }
+
+      // Function to change venue image
+      function changeVenue(direction) {
+        currentVenueIndex =
+          (currentVenueIndex + direction + venues.length) % venues.length;
+        document.getElementById("venue-image").src =
+          "{{ url_for('static', filename='images/') }}" +
+          venues[currentVenueIndex] +
+          ".jpeg";
+        document.getElementById("venue-image").alt = venues[currentVenueIndex];
+        document.getElementById("venue-name").innerText =
+          venues[currentVenueIndex];
+      }
+    </script>
+  </body>
+</html>

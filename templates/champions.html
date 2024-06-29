@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IPL 2025 Win Predictor</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-image: url("{{ url_for('static', filename='images/background.png') }}");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        position: relative;
+      }
+
+      .logo {
+        margin-bottom: 10px;
+        margin-top: 10px;
+        z-index: 2;
+      }
+
+      .logo img {
+        width: 300px;
+      }
+
+      .content {
+        position: relative;
+        display: inline-block;
+        margin-top: 20px;
+        z-index: 2;
+        text-align: center;
+      }
+
+      .content img {
+        max-width: 100%;
+        max-height: 330px; /* Adjust this value as needed */
+        margin-top: 10px;
+        box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+        opacity: 0;
+        transform: translateY(50px);
+        transition: opacity 1s, transform 1s;
+      }
+
+      .winner-text {
+        font-size: 24px;
+        color: white; /* Text color */
+        font-weight: bold;
+        background-color: rgba(0, 0, 0, 0.6);
+        padding: 10px 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        opacity: 0;
+        transform: translateY(50px);
+        transition: opacity 1s, transform 1s;
+        box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+      }
+
+      .goback {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        z-index: 3;
+        background-color: #4f91cd;
+        color: #ffffff;
+        border: none;
+        padding: 12px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+      }
+
+      .goback:hover {
+        background-color: #19388a;
+      }
+
+      canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 1;
+        width: 100%;
+        height: 100%;
+      }
+
+      /* Button styling */
+      button {
+        background-color: #3f51b5;
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        font-size: 18px;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background-color 0.3s, transform 0.2s;
+        margin-bottom: 20px;
+      }
+
+      button:hover {
+        background-color: #303f9f;
+        transform: scale(1.05);
+      }
+    </style>
+  </head>
+  <body>
+    <button class="goback" onclick="goBack()">Go Back</button>
+
+    <div class="logo">
+      <img
+        src="{{ url_for('static', filename='images/Logo.png') }}"
+        alt="IPL 2025 Logo"
+      />
+    </div>
+    <div class="content">
+      <button type="button" id="seriesWinner">Predict Series Winner</button>
+      <div id="result" class="winner-text"></div>
+      <img
+        src="{{ url_for('static', filename='images/champions.jpg') }}"
+        alt="Champions"
+        id="champions-image"
+      />
+    </div>
+
+    <!-- Canvas for fireworks -->
+    <canvas id="canvas"></canvas>
+
+    <script>
+      // JavaScript for fireworks animation
+      window.addEventListener("resize", resizeCanvas, false);
+      window.addEventListener("DOMContentLoaded", onLoad, false);
+
+      window.requestAnimationFrame =
+        window.requestAnimationFrame ||
+        window.webkitRequestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        window.oRequestAnimationFrame ||
+        window.msRequestAnimationFrame ||
+        function (callback) {
+          window.setTimeout(callback, 1000 / 60);
+        };
+
+      var canvas,
+        ctx,
+        w,
+        h,
+        particles = [],
+        probability = 0.04,
+        xPoint,
+        yPoint;
+
+      function onLoad() {
+        canvas = document.getElementById("canvas");
+        ctx = canvas.getContext("2d");
+        resizeCanvas();
+
+        window.requestAnimationFrame(updateWorld);
+      }
+
+      function resizeCanvas() {
+        if (!!canvas) {
+          w = canvas.width = window.innerWidth;
+          h = canvas.height = window.innerHeight;
+        }
+      }
+
+      function updateWorld() {
+        update();
+        paint();
+        window.requestAnimationFrame(updateWorld);
+      }
+
+      function update() {
+        if (particles.length < 500 && Math.random() < probability) {
+          createFirework();
+        }
+        var alive = [];
+        for (var i = 0; i < particles.length; i++) {
+          if (particles[i].move()) {
+            alive.push(particles[i]);
+          }
+        }
+        particles = alive;
+      }
+
+      function paint() {
+        ctx.clearRect(0, 0, w, h);
+        ctx.globalCompositeOperation = "lighter";
+        for (var i = 0; i < particles.length; i++) {
+          particles[i].draw(ctx);
+        }
+      }
+
+      function createFirework() {
+        xPoint = Math.random() * (w - 200) + 100;
+        yPoint = Math.random() * (h - 200) + 100;
+        var nFire = Math.random() * 50 + 100;
+        var c =
+          "rgb(" +
+          ~~(Math.random() * 200 + 55) +
+          "," +
+          ~~(Math.random() * 200 + 55) +
+          "," +
+          ~~(Math.random() * 200 + 55) +
+          ")";
+        for (var i = 0; i < nFire; i++) {
+          var particle = new Particle();
+          particle.color = c;
+          var vy = Math.sqrt(25 - particle.vx * particle.vx);
+          if (Math.abs(particle.vy) > vy) {
+            particle.vy = particle.vy > 0 ? vy : -vy;
+          }
+          particles.push(particle);
+        }
+      }
+
+      function Particle() {
+        this.w = this.h = Math.random() * 4 + 1;
+
+        this.x = xPoint - this.w / 2;
+        this.y = yPoint - this.h / 2;
+
+        this.vx = (Math.random() - 0.5) * 10;
+        this.vy = (Math.random() - 0.5) * 10;
+
+        this.alpha = Math.random() * 0.5 + 0.5;
+
+        this.color;
+      }
+
+      Particle.prototype = {
+        gravity: 0.05,
+        move: function () {
+          this.x += this.vx;
+          this.vy += this.gravity;
+          this.y += this.vy;
+          this.alpha -= 0.01;
+          if (
+            this.x <= -this.w ||
+            this.x >= screen.width ||
+            this.y >= screen.height ||
+            this.alpha <= 0
+          ) {
+            return false;
+          }
+          return true;
+        },
+        draw: function (c) {
+          c.save();
+          c.beginPath();
+
+          c.translate(this.x + this.w / 2, this.y + this.h / 2);
+          c.arc(0, 0, this.w, 0, Math.PI * 2);
+          c.fillStyle = this.color;
+          c.globalAlpha = this.alpha;
+
+          c.closePath();
+          c.fill();
+          c.restore();
+        },
+      };
+
+      function goBack() {
+        window.history.back();
+      }
+
+      // Predict Series Winner button event listener
+      document
+        .getElementById("seriesWinner")
+        .addEventListener("click", function () {
+          axios
+            .get("/predict-ipl-2025")
+            .then((response) => {
+              const resultElement = document.getElementById("result");
+              resultElement.innerText =
+                "Predicted Series Winner: " + response.data.seriesWinner;
+              resultElement.style.opacity = 1;
+              resultElement.style.transform = "translateY(0)";
+
+              // Show image after 3 seconds
+              const championsImage = document.getElementById("champions-image");
+              setTimeout(() => {
+                championsImage.style.opacity = 1;
+                championsImage.style.transform = "translateY(0)";
+              }, 1500);
+            })
+            .catch((error) => {
+              console.error("There was an error!", error);
+            });
+        });
+    </script>
+  </body>
+</html>
