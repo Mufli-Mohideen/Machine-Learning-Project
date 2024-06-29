@@ -84,9 +84,14 @@ venue_name_mapping = {
     'Bharat Ratna Shri Atal Bihari Vajpayee Ekana Cricket Stadium, Lucknow': 'Bharat Ratna Shri Atal Bihari Vajpayee Ekana Cricket Stadium'
 }
 
+
 @app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/home')
 def home():
-    return render_template('index.html', teams=teams, venues=venues)
+    return render_template('home.html', teams=teams, venues=venues)
 
 @app.route('/predict', methods=['POST'])
 def predict():

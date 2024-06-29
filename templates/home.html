@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IPL Match Predictor</title>
+    <!-- Load Axios for making HTTP requests -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  </head>
+  <body>
+    <h1>IPL Match Predictor</h1>
+
+    <!-- Form for submitting prediction data -->
+    <form id="predictionForm">
+      <!-- Dropdown for selecting Team 1 -->
+      <label for="team1">Team 1:</label>
+      <select id="team1" name="team1">
+        {% for team in teams %}
+        <option value="{{ team }}">{{ team }}</option>
+        {% endfor %}
+      </select>
+      <br />
+
+      <!-- Dropdown for selecting Team 2 -->
+      <label for="team2">Team 2:</label>
+      <select id="team2" name="team2">
+        {% for team in teams %}
+        <option value="{{ team }}">{{ team }}</option>
+        {% endfor %}
+      </select>
+      <br />
+
+      <!-- Dropdown for selecting Venue -->
+      <label for="venue">Venue:</label>
+      <select id="venue" name="venue">
+        {% for venue in venues %}
+        <option value="{{ venue }}">{{ venue }}</option>
+        {% endfor %}
+      </select>
+      <br />
+
+      <!-- Submit button for match prediction -->
+      <button type="submit">Predict Match</button>
+
+      <!-- Submit button for series winner prediction -->
+      <button type="button" id="seriesWinner">Predict Series Winner</button>
+    </form>
+
+    <!-- Display the prediction result -->
+    <div id="result"></div>
+
+    <!-- JavaScript to handle form submission and display the result -->
+    <script>
+      // Function to handle form submission for match prediction
+      document
+        .getElementById("predictionForm")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+
+          const formData = new FormData(event.target);
+          const data = Object.fromEntries(formData.entries());
+
+          console.log("Form Data:", data); // Check what data is being sent
+
+          axios
+            .post("/predict", new URLSearchParams(data))
+            .then((response) => {
+              document.getElementById("result").innerText =
+                "Predicted Winner: " + response.data.prediction;
+            })
+            .catch((error) => {
+              console.error("There was an error!", error);
+            });
+        });
+
+      // Function to handle series winner prediction
+      document
+        .getElementById("seriesWinner")
+        .addEventListener("click", function () {
+          axios
+            .get("/predict-ipl-2025")
+            .then((response) => {
+              document.getElementById("result").innerText =
+                "Predicted Series Winner: " + response.data.seriesWinner;
+            })
+            .catch((error) => {
+              console.error("There was an error!", error);
+            });
+        });
+    </script>
+  </body>
+</html>
