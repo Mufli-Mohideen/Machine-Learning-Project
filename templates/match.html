@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Team and Venue Selection</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <style>
       html,
       body {
@@ -13,8 +14,7 @@
       }
 
       body {
-        background-image: url("background.png");
-        background-color: #f0f0f0;
+        background-image: url("{{ url_for('static', filename='images/background.png') }}");
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
@@ -24,11 +24,11 @@
       }
 
       .container {
-        max-width: 800px;
+        max-width: 900px;
         width: 100%;
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        grid-gap: 20px;
+        grid-gap: 30px;
         padding: 20px;
         box-sizing: border-box;
       }
@@ -41,7 +41,7 @@
         font-size: 18px;
         font-weight: bold;
         margin-bottom: 10px;
-        color: white;
+        color: #fff;
       }
 
       .item-container {
@@ -49,7 +49,17 @@
         flex-direction: column;
         align-items: center;
         justify-content: space-between;
-        margin-top: 0%;
+        height: 350px;
+        background-color: rgba(255, 255, 255, 0.815);
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+        transition: transform 0.3s, box-shadow 0.3s;
+      }
+
+      .item-container:hover {
+        /* transform: translateY(-10px); */
+        box-shadow: rgba(0, 0, 0, 0.5) 0px 10px 20px;
       }
 
       .arrow {
@@ -58,12 +68,14 @@
         border: none;
         padding: 10px 15px;
         cursor: pointer;
-        transition: background-color 0.3s;
+        transition: background-color 0.3s, transform 0.3s;
         border-radius: 5px;
+        box-shadow: rgba(0, 0, 0, 0.25) 0px 3px 8px;
       }
 
       .arrow:hover {
-        background-color: #19388a;
+        background-color: #0056b3;
+        transform: scale(1.1);
       }
 
       .arrow.up-arrow {
@@ -74,14 +86,18 @@
         transform: rotate(90deg);
       }
 
-      .content img {
+      .item-image {
         max-width: 100%;
-        max-height: 300px;
+        height: auto;
+        max-height: 150px;
         margin-top: 20px;
-        box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
-        opacity: 0;
-        transform: translateY(50px);
-        transition: opacity 1s, transform 1s;
+        transition: transform 0.3s, box-shadow 0.3s;
+        border-radius: 10px;
+      }
+
+      .item-image:hover {
+        transform: scale(1.05);
+        box-shadow: rgba(0, 0, 0, 0.25) 0px 5px 15px;
       }
 
       .item-name {
@@ -92,6 +108,7 @@
         background-color: rgba(0, 0, 0, 0.6);
         padding: 5px 10px;
         border-radius: 5px;
+        box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
       }
 
       .predict-button {
@@ -104,109 +121,170 @@
         font-size: 18px;
         font-weight: bold;
         text-align: center;
-        transition: background-color 0.3s;
-        border-radius: 5px;
+        transition: background-color 0.3s, transform 0.3s;
+        border-radius: 10px;
         margin-top: 20px;
+        box-shadow: rgba(0, 0, 0, 0.25) 0px 5px 15px;
       }
 
       .predict-button:hover {
         background-color: #13224a;
+        transform: translateY(-5px);
+        box-shadow: rgba(0, 0, 0, 0.35) 0px 10px 20px;
+      }
+
+      #result {
+        grid-column: span 3;
+        background-color: rgba(0, 0, 0, 0.7);
+        color: #fff;
+        padding: 15px 20px;
+        font-size: 18px;
+        font-weight: bold;
+        text-align: center;
+        border-radius: 10px;
+        margin-top: 20px;
+        box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+        min-height: 20px;
+      }
+      .goback {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        z-index: 3;
+        background-color: #4f91cd;
+        color: #ffffff;
+        border: none;
+        padding: 12px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+      }
+
+      .goback:hover {
+        background-color: #19388a;
       }
     </style>
   </head>
   <body>
-    <div class="container">
-      <!-- Team 1 Selection Section -->
-      <div class="selection-section">
-        <div class="section-title">TEAM 1</div>
-        <div class="item-container">
-          <button
-            class="arrow up-arrow"
-            onclick="changeTeam('team1', -1)"
-            style="margin-bottom: 10px"
-          >
-            &lt;
-          </button>
-          <img
-            id="team1-logo"
-            src="{{ url_for('static', filename='images/Royal Challengers Bengaluru.jpg') }}"
-            alt="Royal Challengers Bengaluru"
-            class="item-image"
-          />
-          <div id="team1-name" class="item-name">
-            Royal Challengers Bengaluru
+    <form id="predictionForm">
+      <button class="goback" onclick="goBack()">Go Back</button>
+      <div class="container">
+        <!-- Team 1 Selection Section -->
+        <div class="selection-section">
+          <div class="section-title">TEAM 1</div>
+          <div class="item-container">
+            <button
+              class="arrow up-arrow"
+              type="button"
+              onclick="changeTeam('team1', -1)"
+              style="margin-bottom: 10px"
+            >
+              &lt;
+            </button>
+            <img
+              id="team1-logo"
+              src="{{ url_for('static', filename='images/Royal-Challengers-Bengaluru.jpg') }}"
+              alt="Royal Challengers Bengaluru"
+              class="item-image"
+            />
+            <div id="team1-name" class="item-name">
+              Royal Challengers Bengaluru
+            </div>
+            <button
+              class="arrow down-arrow"
+              type="button"
+              onclick="changeTeam('team1', 1)"
+              style="margin-top: 10px"
+            >
+              &gt;
+            </button>
+            <input
+              type="hidden"
+              id="team1"
+              name="team1"
+              value="Royal Challengers Bengaluru"
+            />
           </div>
-          <button
-            class="arrow down-arrow"
-            onclick="changeTeam('team1', 1)"
-            style="margin-top: 10px"
-          >
-            &gt;
-          </button>
         </div>
-      </div>
 
-      <!-- Team 2 Selection Section -->
-      <div class="selection-section">
-        <div class="section-title">TEAM 2</div>
-        <div class="item-container">
-          <button
-            class="arrow up-arrow"
-            onclick="changeTeam('team2', -1)"
-            style="margin-bottom: 10px"
-          >
-            &lt;
-          </button>
-          <img
-            id="team2-logo"
-            src="{{ url_for('static', filename='images/Punjab Kings.jpg') }}"
-            alt="Punjab Kings"
-            class="item-image"
-          />
-          <div id="team2-name" class="item-name">Punjab Kings</div>
-          <button
-            class="arrow down-arrow"
-            onclick="changeTeam('team2', 1)"
-            style="margin-top: 10px"
-          >
-            &gt;
-          </button>
+        <!-- Team 2 Selection Section -->
+        <div class="selection-section">
+          <div class="section-title">TEAM 2</div>
+          <div class="item-container">
+            <button
+              class="arrow up-arrow"
+              type="button"
+              onclick="changeTeam('team2', -1)"
+              style="margin-bottom: 10px"
+            >
+              &lt;
+            </button>
+            <img
+              id="team2-logo"
+              src="{{ url_for('static', filename='images/Punjab-Kings.jpg') }}"
+              alt="Punjab Kings"
+              class="item-image"
+            />
+            <div id="team2-name" class="item-name">Punjab Kings</div>
+            <button
+              class="arrow down-arrow"
+              type="button"
+              onclick="changeTeam('team2', 1)"
+              style="margin-top: 10px"
+            >
+              &gt;
+            </button>
+            <input type="hidden" id="team2" name="team2" value="Punjab Kings" />
+          </div>
         </div>
-      </div>
 
-      <!-- Venue Selection Section -->
-      <div class="selection-section">
-        <div class="section-title">VENUES</div>
-        <div class="item-container">
-          <button
-            class="arrow up-arrow"
-            onclick="changeVenue(-1)"
-            style="margin-bottom: 10px"
-          >
-            &lt;
-          </button>
-          <img
-            id="venue-image"
-            src="{{ url_for('static', filename='images/Arun Jaitley Stadium.jpeg') }}"
-            alt="Arun Jaitley Stadium"
-            class="item-image"
-          />
-          <div id="venue-name" class="item-name">Arun Jaitley Stadium</div>
-          <button
-            class="arrow down-arrow"
-            onclick="changeVenue(1)"
-            style="margin-top: 10px"
-          >
-            &gt;
-          </button>
+        <!-- Venue Selection Section -->
+        <div class="selection-section">
+          <div class="section-title">VENUES</div>
+          <div class="item-container">
+            <button
+              class="arrow up-arrow"
+              type="button"
+              onclick="changeVenue(-1)"
+              style="margin-bottom: 10px"
+            >
+              &lt;
+            </button>
+            <img
+              id="venue-image"
+              src="{{ url_for('static', filename='images/Arun-Jaitley-Stadium.jpeg') }}"
+              alt="Arun Jaitley Stadium"
+              class="item-image"
+            />
+            <div id="venue-name" class="item-name">Arun Jaitley Stadium</div>
+            <button
+              class="arrow down-arrow"
+              type="button"
+              onclick="changeVenue(1)"
+              style="margin-top: 10px"
+            >
+              &gt;
+            </button>
+            <input
+              type="hidden"
+              id="venue"
+              name="venue"
+              value="Arun Jaitley Stadium"
+            />
+          </div>
         </div>
-      </div>
+        <div id="result"></div>
 
-      <!-- Predict Winner Button -->
-      <button class="predict-button">PREDICT WINNER</button>
-    </div>
+        <!-- Predict Winner Button -->
+        <button class="predict-button" type="submit">PREDICT WINNER</button>
+      </div>
+    </form>
 
     <script>
+      function goBack() {
+        window.history.back();
+      }
       // Team and venue data
       const teams = [
         "Royal Challengers Bengaluru",
@@ -243,10 +321,13 @@
         let newIndex = (teamIndex + direction + teams.length) % teams.length;
         document.getElementById(teamId + "-logo").src =
           "{{ url_for('static', filename='images/') }}" +
-          teams[newIndex] +
+          teams[newIndex].replace(/ /g, "-") +
           ".jpg";
         document.getElementById(teamId + "-logo").alt = teams[newIndex];
         document.getElementById(teamId + "-name").innerText = teams[newIndex];
+
+        // Update the select value
+        document.getElementById(teamId).value = teams[newIndex];
       }
 
       // Function to change venue image
@@ -255,12 +336,37 @@
           (currentVenueIndex + direction + venues.length) % venues.length;
         document.getElementById("venue-image").src =
           "{{ url_for('static', filename='images/') }}" +
-          venues[currentVenueIndex] +
+          venues[currentVenueIndex].replace(/ /g, "-") +
           ".jpeg";
         document.getElementById("venue-image").alt = venues[currentVenueIndex];
         document.getElementById("venue-name").innerText =
           venues[currentVenueIndex];
+
+        // Update the select value
+        document.getElementById("venue").value = venues[currentVenueIndex];
       }
+
+      document
+        .getElementById("predictionForm")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+
+          const formData = new FormData(event.target);
+          const data = Object.fromEntries(formData.entries());
+
+          console.log("Form Data:", data); // Check what data is being sent
+
+          axios
+            .post("/predict", new URLSearchParams(data))
+            .then((response) => {
+              console.log("Server Response:", response.data); // Log the full response
+              document.getElementById("result").innerText =
+                "Predicted Winner: " + response.data.prediction;
+            })
+            .catch((error) => {
+              console.error("There was an error!", error);
+            });
+        });
     </script>
   </body>
 </html>

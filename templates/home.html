@@ -98,7 +98,7 @@
         <div class="title">Predict 2025 IPL Champions</div>
         <button class="predict-button">Predict</button>
       </div>
-      <div class="predict-box" id="match">
+      <div class="predict-box" id="match" onclick="redirectToMatch()">
         <img
           src="{{ url_for('static', filename='images/ground.jpg') }}"
           alt="Match"
@@ -126,6 +126,9 @@
     <script>
       function redirectToChampions() {
         window.location.href = "{{ url_for('champions') }}";
+      }
+      function redirectToMatch() {
+        window.location.href = "{{ url_for('match') }}";
       }
     </script>
   </body>
