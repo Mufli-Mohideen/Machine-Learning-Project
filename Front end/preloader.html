@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sample Page with Preloader</title>
+    <style>
+        /* Preloader styles */
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #fff;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .loader {
+            border: 16px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 16px solid #3498db;
+            width: 120px;
+            height: 120px;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Content styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: none; /* Hide content initially */
+        }
+
+        header, section, footer {
+            padding: 20px;
+        }
+
+        header {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+        }
+
+        section {
+            margin: 20px;
+        }
+
+        footer {
+            background-color: #f1f1f1;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <!-- Preloader -->
+    <div id="preloader">
+        <div class="loader"></div>
+    </div>
+
+    <!-- Page content -->
+    <header>
+        <h1>Welcome to My Website</h1>
+    </header>
+    
+    <section>
+        <p>This is a sample paragraph. HTML is the standard markup language for creating web pages.</p>
+    </section>
+    
+    <section>
+        <img src="https://www.example.com/sample-image.jpg" alt="Sample Image">
+    </section>
+    
+    <footer>
+        <p>Visit <a href="https://www.example.com">this link</a> for more information.</p>
+    </footer>
+
+    <script>
+        // JavaScript to hide the preloader and show the content
+        window.addEventListener('load', function() {
+            var preloader = document.getElementById('preloader');
+            preloader.style.display = 'none';
+            document.body.style.display = 'block';
+        });
+    </script>
+</body>
+</html>
