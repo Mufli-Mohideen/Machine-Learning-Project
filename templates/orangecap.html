@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IPL 2025 Win Predictor</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-image: url("{{ url_for('static', filename='images/background.png') }}");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start; /* Align content to the top */
+        align-items: center;
+        height: 100vh;
+        margin: 0; /* Remove default margin */
+        position: relative; /* Ensure relative positioning for the body */
+      }
+
+      .logo {
+        margin-bottom: 10px;
+        margin-top: 10px; /* Add margin to the top of the logo if needed */
+        z-index: 2; /* Ensure logo is above canvas */
+      }
+
+      .logo img {
+        width: 300px; /* Adjust the width as needed */
+      }
+
+      .content {
+        position: relative;
+        display: inline-block;
+        margin-top: 20px; /* Adjust margin as needed */
+        z-index: 2; /* Ensure content is above canvas */
+        text-align: center;
+      }
+
+      .content img {
+        max-width: 100%; /* Ensure image doesn't exceed container width */
+        height: auto; /* Maintain aspect ratio */
+        max-height: 400px; /* Set maximum height as needed */
+        margin-bottom: 20px; /* Adjust margin as needed */
+        box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px; /* Add box shadow */
+      }
+
+      canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 1; /* Lower z-index to ensure canvas is behind content */
+        width: 100%;
+        height: 100%;
+      }
+
+      .goback {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        z-index: 3; /* Ensure button is above everything */
+        background-color: #4f91cd;
+        color: #ffffff;
+        border: none;
+        padding: 12px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+      }
+
+      .goback:hover {
+        background-color: #19388a;
+      }
+
+      .OrangeCap-text {
+        font-size: 24px;
+        color: white; /* Text color */
+        font-weight: bold;
+        background-color: rgba(0, 0, 0, 0.6);
+        padding: 10px 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        opacity: 0;
+        transform: translateY(50px);
+        transition: opacity 1s, transform 1s;
+        box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+      }
+
+      button {
+        background-color: #3f51b5;
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        font-size: 18px;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background-color 0.3s, transform 0.2s;
+        margin-bottom: 20px;
+      }
+
+      button:hover {
+        background-color: #303f9f;
+        transform: scale(1.05);
+      }
+
+      .content img {
+        max-width: 100%; /* Ensure image doesn't exceed container width */
+        height: auto; /* Maintain aspect ratio */
+        max-height: 400px; /* Set maximum height as needed */
+        margin-bottom: 20px; /* Adjust margin as needed */
+        box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px; /* Add box shadow */
+      }
+
+      .Decision {
+        width: 50%; /* Ensure image takes up most of the container width */
+        height: auto; /* Maintain aspect ratio */
+        max-height: 900px; /* Increase maximum height */
+        margin-bottom: 20px; /* Adjust margin as needed */
+        border-radius: 15px; /* Add border radius */
+        border: 1px solid #ffffff; /* Add white border */
+      }
+
+      .gif-container {
+        display: none; /* Hide GIF initially */
+        height: 450px; /* Set a fixed height for the container */
+        text-align: center;
+      }
+
+      .gif-container img {
+        height: 100%;
+        box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px,
+          rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px,
+          rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
+      }
+
+      .pulse {
+        animation: pulse 2s ease-in-out 3; /* Pulse effect, 3 times */
+      }
+
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.03);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <button class="goback" onclick="goBack()">Go Back</button>
+
+    <div class="logo">
+      <img
+        src="{{ url_for('static', filename='images/Logo.png') }}"
+        alt="IPL 2025 Logo"
+      />
+    </div>
+    <div class="content">
+      <button type="button" id="orangeCap">Predict Orange Cap Holder</button>
+      <div class="gif-container" id="gifContainer">
+        <img
+          src="{{ url_for('static', filename='images/predictOrangeCap.png') }}"
+          alt="Decision Making"
+          id="Decision"
+          class="Decision"
+        />
+      </div>
+      <div id="orangeCapResult" class="OrangeCap-text"></div>
+    </div>
+
+    <!-- Canvas for fireworks -->
+    <canvas id="canvas"></canvas>
+
+    <script>
+      // JavaScript for fireworks animation
+      window.addEventListener("resize", resizeCanvas, false);
+      window.addEventListener("DOMContentLoaded", onLoad, false);
+
+      window.requestAnimationFrame =
+        window.requestAnimationFrame ||
+        window.webkitRequestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        window.oRequestAnimationFrame ||
+        window.msRequestAnimationFrame ||
+        function (callback) {
+          window.setTimeout(callback, 1000 / 60);
+        };
+
+      var canvas,
+        ctx,
+        w,
+        h,
+        particles = [],
+        probability = 0.04,
+        xPoint,
+        yPoint;
+
+      function onLoad() {
+        canvas = document.getElementById("canvas");
+        ctx = canvas.getContext("2d");
+        resizeCanvas();
+        window.requestAnimationFrame(updateWorld);
+      }
+
+      function resizeCanvas() {
+        if (!!canvas) {
+          w = canvas.width = window.innerWidth;
+          h = canvas.height = window.innerHeight;
+        }
+      }
+
+      function updateWorld() {
+        update();
+        paint();
+        window.requestAnimationFrame(updateWorld);
+      }
+
+      function update() {
+        if (particles.length < 500 && Math.random() < probability) {
+          createFirework();
+        }
+        var alive = [];
+        for (var i = 0; i < particles.length; i++) {
+          if (particles[i].move()) {
+            alive.push(particles[i]);
+          }
+        }
+        particles = alive;
+      }
+
+      function paint() {
+        ctx.clearRect(0, 0, w, h); // Clear canvas to transparent
+        ctx.globalCompositeOperation = "lighter";
+        for (var i = 0; i < particles.length; i++) {
+          particles[i].draw(ctx);
+        }
+      }
+
+      function createFirework() {
+        xPoint = Math.random() * (w - 200) + 100;
+        yPoint = Math.random() * (h - 200) + 100;
+        var nFire = Math.random() * 50 + 100;
+        var c =
+          "rgb(" +
+          ~~(Math.random() * 200 + 55) +
+          "," +
+          ~~(Math.random() * 200 + 55) +
+          "," +
+          ~~(Math.random() * 200 + 55) +
+          ")";
+        for (var i = 0; i < nFire; i++) {
+          var particle = new Particle();
+          particle.color = c;
+          var vy = Math.sqrt(25 - particle.vx * particle.vx);
+          if (Math.abs(particle.vy) > vy) {
+            particle.vy = particle.vy > 0 ? vy : -vy;
+          }
+          particles.push(particle);
+        }
+      }
+
+      function Particle() {
+        this.w = this.h = Math.random() * 4 + 1;
+        this.x = xPoint - this.w / 2;
+        this.y = yPoint - this.h / 2;
+        this.vx = Math.random() * 10 - 5;
+        this.vy = Math.random() * 10 - 5;
+        this.alpha = Math.random() * 0.5 + 0.5;
+        this.color;
+      }
+
+      Particle.prototype = {
+        gravity: 0.05,
+        move: function () {
+          this.x += this.vx;
+          this.vy += this.gravity;
+          this.y += this.vy;
+          this.alpha -= 0.01;
+          if (
+            this.x <= -this.w ||
+            this.x >= w ||
+            this.y >= h ||
+            this.alpha <= 0
+          ) {
+            return false;
+          }
+          return true;
+        },
+        draw: function (c) {
+          c.save();
+          c.beginPath();
+          c.translate(this.x + this.w / 2, this.y + this.h / 2);
+          c.arc(0, 0, this.w, 0, Math.PI * 2);
+          c.fillStyle = this.color;
+          c.globalAlpha = this.alpha;
+          c.closePath();
+          c.fill();
+          c.restore();
+        },
+      };
+
+      // JavaScript for button interaction
+      document
+        .getElementById("orangeCap")
+        .addEventListener("click", function () {
+          const gifContainer = document.getElementById("gifContainer");
+          const decisionImg = document.getElementById("Decision");
+
+          gifContainer.style.display = "block"; // Show the GIF
+
+          // Add the pulse class to start the animation
+          decisionImg.classList.add("pulse");
+
+          // Remove the pulse class after the animation ends to allow re-triggering
+          setTimeout(function () {
+            decisionImg.classList.remove("pulse");
+            gifContainer.style.display = "none"; // Hide the GIF after the animation ends
+          }, 6000); // Duration of the animation (3 pulses * 2 seconds per pulse)
+        });
+
+      function goBack() {
+        window.history.back();
+      }
+    </script>
+  </body>
+</html>

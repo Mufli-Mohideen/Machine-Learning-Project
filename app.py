@@ -92,6 +92,14 @@ def index():
 def match():
     return render_template('match.html')
 
+@app.route('/purplecap')
+def purplecap():
+    return render_template('purplecap.html')
+
+@app.route('/orangecap')
+def orangecap():
+    return render_template('orangecap.html')
+
 @app.route('/champions', methods=['GET', 'POST'])
 def champions():
     if request.method == 'POST':

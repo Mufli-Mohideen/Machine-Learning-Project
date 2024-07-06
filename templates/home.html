@@ -106,7 +106,7 @@
         <div class="title">Predict a match</div>
         <button class="predict-button">Predict</button>
       </div>
-      <div class="predict-box" id="purple-cap">
+      <div class="predict-box" id="purple-cap" onclick="redirectToPurpleCap()">
         <img
           src="{{ url_for('static', filename='images/purple-cap.jpg') }}"
           alt="Purple Cap"
@@ -114,7 +114,7 @@
         <div class="title">Predict Purple Cap Holder</div>
         <button class="predict-button">Predict</button>
       </div>
-      <div class="predict-box" id="orange-cap">
+      <div class="predict-box" id="orange-cap" onclick="redirectToOrangeCap()">
         <img
           src="{{ url_for('static', filename='images/orange-cap.jpg') }}"
           alt="Orange Cap"
@@ -129,6 +129,12 @@
       }
       function redirectToMatch() {
         window.location.href = "{{ url_for('match') }}";
+      }
+      function redirectToPurpleCap() {
+        window.location.href = "{{ url_for('purplecap') }}";
+      }
+      function redirectToOrangeCap() {
+        window.location.href = "{{ url_for('orangecap') }}";
       }
     </script>
   </body>
