@@ -272,7 +272,7 @@
         window.history.back();
       }
 
-      // Predict Series Winner button event listener
+      //Predict series winners and Validation is done
       document
         .getElementById("seriesWinner")
         .addEventListener("click", function () {
@@ -285,7 +285,7 @@
               resultElement.style.opacity = 1;
               resultElement.style.transform = "translateY(0)";
 
-              // Show image after 3 seconds
+              // Show Champions image after 3 seconds
               const championsImage = document.getElementById("champions-image");
               setTimeout(() => {
                 championsImage.style.opacity = 1;
